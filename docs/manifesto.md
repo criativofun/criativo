@@ -1,0 +1,1 @@
+# Manifesto do crIAtivo
