@@ -1,117 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Transforme os desenhos do seu filho em personagens e livros ilustrados únicos." />
-    <title>crIAtivo — desenhos que ganham vida</title>
+    <title>crIAtivo — Veja o desenho do seu filho ganhar vida</title>
+    <meta name="description" content="O crIAtivo transforma desenhos feitos por crianças em personagens únicos e livros ilustrados para vocês criarem e guardarem juntos." />
+    <meta name="author" content="crIAtivo" />
+
+    <meta property="og:title" content="crIAtivo — Veja o desenho do seu filho ganhar vida" />
+    <meta property="og:description" content="Desenhos de criança viram personagens únicos e livros ilustrados para a família guardar." />
+    <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="src/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   </head>
+
   <body>
-    <header class="nav shell">
-      <a class="brand" href="#top" aria-label="crIAtivo, início">cr<span>IA</span>tivo<i>.</i></a>
-      <nav aria-label="Principal">
-        <a href="#como-funciona">Como funciona</a>
-        <a href="#familias">Para famílias</a>
-      </nav>
-      <button class="button button-small button-ghost js-start">Criar uma aventura</button>
-    </header>
-
-    <main id="top">
-      <section class="hero shell">
-        <div class="hero-copy">
-          <div class="eyebrow"><span>✦</span> Feito para criar juntos</div>
-          <h1>Todo desenho guarda uma <em>grande aventura.</em></h1>
-          <p>Transforme a imaginação do seu filho em um personagem único e um livro ilustrado para guardar para sempre.</p>
-          <div class="hero-actions">
-            <button class="button js-start">Dar vida a um desenho <span>→</span></button>
-            <span class="microcopy">Leva poucos minutos</span>
-          </div>
-        </div>
-
-        <div class="hero-art" aria-label="Um desenho infantil se transformando em personagem">
-          <div class="sun"></div>
-          <div class="spark spark-one">✦</div><div class="spark spark-two">✦</div>
-          <div class="paper">
-            <span class="tape"></span>
-            <svg class="doodle" viewBox="0 0 240 250" role="img" aria-label="Desenho infantil de uma criatura">
-              <path d="M70 90 Q42 47 86 35 Q119 2 145 42 Q198 40 180 91 Q209 124 173 145 L170 194 Q147 224 124 191 Q90 224 70 191 L70 146 Q30 125 70 90Z"/>
-              <circle cx="101" cy="91" r="8"/><circle cx="148" cy="91" r="8"/><path d="M105 122 Q126 139 147 120"/>
-              <path d="M77 147 L41 172 M169 146 L205 170 M92 190 L75 226 M151 191 L170 225"/>
-            </svg>
-            <small>meu amigo imaginário</small>
-          </div>
-          <div class="magic-arrow">→</div>
-          <div class="character-card">
-            <div class="creature">
-              <span class="ear left"></span><span class="ear right"></span>
-              <div class="face"><b class="eye left"></b><b class="eye right"></b><span class="smile"></span></div>
-              <div class="body"><span class="belly"></span></div>
-              <span class="arm left"></span><span class="arm right"></span>
-            </div>
-            <strong>Pingo</strong><small>Explorador de estrelas</small>
-          </div>
-        </div>
-      </section>
-
-      <section class="trust-strip"><p>Um momento de imaginação <span>•</span> Um personagem só seu <span>•</span> Uma lembrança para sempre</p></section>
-
-      <section class="steps shell" id="como-funciona">
-        <div class="section-heading"><span>É simples e mágico</span><h2>Do papel para uma história<br/>em três pequenos passos.</h2></div>
-        <div class="step-grid">
-          <article><b>01</b><div class="step-icon coral">✎</div><h3>Desenhe</h3><p>A criança cria livremente no papel. Não precisa ser perfeito — precisa ser dela.</p></article>
-          <article><b>02</b><div class="step-icon purple">✦</div><h3>Dê vida</h3><p>Nós revelamos o personagem, preservando as formas, cores e ideias originais.</p></article>
-          <article><b>03</b><div class="step-icon yellow">▤</div><h3>Vivam a aventura</h3><p>O personagem vira protagonista de um livro ilustrado para vocês lerem juntos.</p></article>
-        </div>
-      </section>
-
-      <section class="family shell" id="familias">
-        <div><span class="section-label">Mais que um arquivo</span><h2>Uma lembrança da infância que cabe na estante.</h2><p>O desenho original, a história inventada e o personagem ficam reunidos em uma aventura que a família pode revisitar sempre.</p><button class="text-button js-start">Criar nossa primeira aventura →</button></div>
-        <div class="book-scene"><div class="book"><div class="page left-page"><small>O desenho original</small><div class="mini-doodle">☆<br/>╱│╲</div></div><div class="page right-page"><small>A grande aventura</small><div class="mini-world">☁<br/><span>★</span> 〰</div></div></div></div>
-      </section>
-
-      <section class="final-cta">
-        <span>✦</span><h2>Quem mora dentro<br/>do desenho de hoje?</h2><p>Descubram juntos.</p><button class="button button-light js-start">Começar agora →</button>
-      </section>
-    </main>
-
-    <footer class="shell"><a class="brand" href="#top">cr<span>IA</span>tivo<i>.</i></a><p>Onde a imaginação das crianças ganha vida.</p><small>© 2026 crIAtivo.fun</small></footer>
-
-    <div class="flow" id="creation-flow" aria-hidden="true">
-      <div class="flow-panel">
-        <button class="close-flow" aria-label="Fechar">×</button>
-        <div class="progress"><span></span><span></span><span></span><span></span></div>
-
-        <section class="flow-step active" data-step="0">
-          <span class="flow-kicker">Primeiro passo</span><h2>Vamos conhecer o desenho?</h2><p>Tire uma foto bem iluminada ou escolha uma imagem do aparelho.</p>
-          <label class="dropzone"><input id="drawing-input" type="file" accept="image/*"/><span class="upload-icon">↥</span><strong>Escolher o desenho</strong><small>JPG ou PNG · nada será enviado nesta demonstração</small><img id="drawing-preview" alt="Prévia do desenho selecionado"/></label>
-          <button class="button next-step" disabled>Continuar →</button>
-        </section>
-
-        <section class="flow-step" data-step="1">
-          <span class="flow-kicker">Quem encontramos?</span><h2>Conte um pouco sobre seu personagem.</h2><p>Essas pistas ajudam a história a continuar sendo da criança.</p>
-          <div class="form-grid"><label>Como ele se chama?<input id="character-name" placeholder="Ex.: Pingo" maxlength="30"/></label><label>O que ele mais gosta?<input id="character-like" placeholder="Ex.: explorar estrelas" maxlength="60"/></label><label class="wide">Qual poder ou detalhe nunca pode faltar?<input id="character-power" placeholder="Ex.: uma mochila que brilha no escuro" maxlength="80"/></label></div>
-          <div class="flow-actions"><button class="back-step">← Voltar</button><button class="button next-step">Escolher aventura →</button></div>
-        </section>
-
-        <section class="flow-step" data-step="2">
-          <span class="flow-kicker">A primeira aventura</span><h2>Para onde vamos hoje?</h2><p>Escolha um mundo. A criança será a diretora da história.</p>
-          <div class="theme-grid"><button data-theme="Espaço"><span>🚀</span>Espaço</button><button data-theme="Dinossauros"><span>🦕</span>Dinossauros</button><button data-theme="Fundo do mar"><span>🐙</span>Fundo do mar</button><button data-theme="Floresta mágica"><span>🌳</span>Floresta mágica</button><button data-theme="Castelo"><span>🏰</span>Castelo</button><button data-theme="Surpresa"><span>🎲</span>Surpresa</button></div>
-          <div class="flow-actions"><button class="back-step">← Voltar</button><button class="button next-step" disabled>Criar meu livro ✦</button></div>
-        </section>
-
-        <section class="flow-step result-step" data-step="3">
-          <span class="flow-kicker">Sua aventura começou</span><h2><span id="result-name">Seu personagem</span> e o segredo do <span id="result-theme">mundo mágico</span></h2>
-          <div class="result-book"><div class="result-cover"><span>Uma aventura de</span><strong id="cover-name">Pingo</strong><div class="cover-stars">✦ ◦ ★</div><small>crIAtivo</small></div><div class="result-copy"><span>Prévia do livro</span><p>Quando <strong id="story-name">Pingo</strong> encontrou uma pequena luz atrás do desenho, descobriu que o caminho levava ao mundo de <strong id="story-theme">grandes aventuras</strong>...</p><small>Na versão completa, texto e ilustrações serão criados com base no desenho.</small></div></div>
-          <div class="flow-actions"><button class="restart-flow">Criar outro</button><button class="button close-result">Guardar na biblioteca</button></div>
-        </section>
-      </div>
-    </div>
-
-    <script src="src/app.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
