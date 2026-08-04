@@ -54,12 +54,6 @@ const HowItWorks = () => {
         </div>
 
         <ol className="relative max-w-3xl mx-auto">
-          {/* linha da jornada */}
-          <span
-            className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-primary/40 via-accent/40 to-secondary/50"
-            aria-hidden="true"
-          />
-
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -68,7 +62,7 @@ const HowItWorks = () => {
                 className="relative flex items-start gap-4 md:gap-6 pb-8 last:pb-0 group"
               >
                 <div
-                  className={`relative z-10 shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center ${step.accent} bg-card border-2 border-border shadow-sm transition-transform duration-300 group-hover:-translate-y-1`}
+                  className={`relative z-10 shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center ${step.accent} border-2 border-border shadow-sm transition-transform duration-300 group-hover:-translate-y-1`}
                 >
                   <Icon size={26} />
                   <span
