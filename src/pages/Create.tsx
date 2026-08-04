@@ -21,6 +21,8 @@ import characterImg from "@/assets/demo-2-character.jpg";
 import bookImg from "@/assets/demo-3-book.jpg";
 
 const TOTAL_STEPS = 5;
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
 
 const loadingMessages = [
   "Observando cada detalhe...",
@@ -45,6 +47,7 @@ const adventures = [
 const Create = () => {
   const [step, setStep] = useState(1);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState("");
   const [consent, setConsent] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -80,6 +83,21 @@ const Create = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    setUploadError("");
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setUploadError("Escolha uma imagem no formato JPG ou PNG.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setUploadError("A imagem precisa ter no máximo 10 MB.");
+      event.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => setUploadedImage(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -88,6 +106,7 @@ const Create = () => {
 
   const removeDrawing = () => {
     setUploadedImage(null);
+    setUploadError("");
     setSelectedCharacter(null);
   };
 
@@ -180,18 +199,27 @@ const Create = () => {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png"
                   className="hidden"
                   onChange={handleImageUpload}
                 />
                 <input
                   ref={cameraInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png"
                   capture="environment"
                   className="hidden"
                   onChange={handleImageUpload}
                 />
+
+                {uploadError && (
+                  <p
+                    role="alert"
+                    className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-bold text-destructive"
+                  >
+                    {uploadError}
+                  </p>
+                )}
 
                 <label className="flex items-start gap-3 rounded-2xl bg-muted/60 p-4 cursor-pointer">
                   <Checkbox
