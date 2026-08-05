@@ -5,7 +5,12 @@ type GenerateCharactersResponse = {
   error?: string;
 };
 
-export async function generateCharacterInterpretations(imageDataUrl: string): Promise<string[]> {
+export type CharacterStyle = "3d" | "2d" | "vector";
+
+export async function generateCharacterInterpretations(
+  imageDataUrl: string,
+  style: CharacterStyle,
+): Promise<string[]> {
   const { url, publishableKey, isConfigured } = appConfig.supabase;
 
   if (!isConfigured) {
@@ -19,7 +24,7 @@ export async function generateCharacterInterpretations(imageDataUrl: string): Pr
       apikey: publishableKey,
       Authorization: `Bearer ${publishableKey}`,
     },
-    body: JSON.stringify({ imageDataUrl }),
+    body: JSON.stringify({ imageDataUrl, style }),
   });
 
   const result = (await response.json().catch(() => ({}))) as GenerateCharactersResponse;
@@ -30,4 +35,3 @@ export async function generateCharacterInterpretations(imageDataUrl: string): Pr
 
   return result.images;
 }
-
