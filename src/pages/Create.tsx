@@ -17,8 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Header from "@/components/Header";
-import characterImg from "@/assets/demo-2-character.jpg";
 import bookImg from "@/assets/demo-3-book.jpg";
+import { generateCharacterInterpretations } from "@/lib/ai";
 
 const TOTAL_STEPS = 5;
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -48,10 +48,12 @@ const Create = () => {
   const [step, setStep] = useState(1);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [generationError, setGenerationError] = useState("");
   const [consent, setConsent] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [generatedCharacters, setGeneratedCharacters] = useState<string[]>([]);
   const [characterData, setCharacterData] = useState({
     name: "",
     personality: "",
@@ -70,21 +72,36 @@ const Create = () => {
     const interval = window.setInterval(() => {
       setMessageIndex((i) => Math.min(i + 1, loadingMessages.length - 1));
     }, 1400);
-    const done = window.setTimeout(() => {
-      setIsThinking(false);
-      setStep(2);
-    }, 4400);
     return () => {
       window.clearInterval(interval);
-      window.clearTimeout(done);
     };
   }, [isThinking]);
+
+  const generateCharacters = async () => {
+    if (!uploadedImage) return;
+    setGenerationError("");
+    setSelectedCharacter(null);
+    setIsThinking(true);
+
+    try {
+      const images = await generateCharacterInterpretations(uploadedImage);
+      setGeneratedCharacters(images);
+      setStep(2);
+    } catch (error) {
+      setGenerationError(
+        error instanceof Error ? error.message : "Não foi possível dar vida ao desenho agora.",
+      );
+    } finally {
+      setIsThinking(false);
+    }
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setUploadError("");
+    setGenerationError("");
 
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       setUploadError("Escolha uma imagem no formato JPG ou PNG.");
@@ -108,6 +125,7 @@ const Create = () => {
     setUploadedImage(null);
     setUploadError("");
     setSelectedCharacter(null);
+    setGeneratedCharacters([]);
   };
 
   const goBack = () => setStep((s) => Math.max(1, s - 1));
@@ -238,7 +256,7 @@ const Create = () => {
                 </p>
 
                 <Button
-                  onClick={() => setIsThinking(true)}
+                  onClick={generateCharacters}
                   disabled={!uploadedImage || !consent}
                   size="xl"
                   variant="playful"
@@ -246,6 +264,14 @@ const Create = () => {
                 >
                   Dar vida a este desenho
                 </Button>
+                {generationError && (
+                  <p
+                    role="alert"
+                    className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-bold text-destructive"
+                  >
+                    {generationError}
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
@@ -278,26 +304,28 @@ const Create = () => {
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {interpretations.map((option) => (
+                  {generatedCharacters.map((image, index) => {
+                    const option = interpretations[index] ?? interpretations[0];
+                    return (
                     <button
-                      key={option.id}
+                      key={`${option.id}-${index}`}
                       type="button"
-                      onClick={() => setSelectedCharacter(option.id)}
+                      onClick={() => setSelectedCharacter(String(index))}
                       className={`relative text-left rounded-2xl border-2 p-2 transition-all ${
-                        selectedCharacter === option.id
+                        selectedCharacter === String(index)
                           ? "border-primary bg-primary/5 shadow-lg"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
                       <img
-                        src={characterImg}
+                        src={image}
                         alt={`Interpretação do personagem: ${option.label}`}
                         width={912}
                         height={912}
                         loading="lazy"
                         className={`w-full aspect-square object-cover rounded-xl ${option.style}`}
                       />
-                      {selectedCharacter === option.id && (
+                      {selectedCharacter === String(index) && (
                         <span className="absolute top-3 right-3 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                           <Check size={16} />
                         </span>
@@ -305,11 +333,12 @@ const Create = () => {
                       <span className="block font-bold text-sm text-foreground mt-2">{option.label}</span>
                       <span className="block text-xs text-muted-foreground pb-1">{option.hint}</span>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" size="lg" className="gap-2" onClick={() => setIsThinking(true)}>
+                  <Button variant="outline" size="lg" className="gap-2" onClick={generateCharacters}>
                     <RefreshCw size={18} />
                     Tentar novamente
                   </Button>
