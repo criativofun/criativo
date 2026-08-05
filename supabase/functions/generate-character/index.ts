@@ -6,11 +6,19 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const variants = [
-  "Use um acabamento de livro infantil contemporâneo, mantendo o resultado extremamente fiel ao desenho.",
-  "Use cores um pouco mais vivas e alegres, sem alterar nenhuma característica do personagem.",
-  "Use um acabamento suave, delicado e acolhedor, sem alterar nenhuma característica do personagem.",
-];
+type CharacterStyle = "3d" | "2d" | "vector";
+
+const styleProfiles: Record<CharacterStyle, { artDirection: string }> = {
+  "3d": {
+    artDirection: "personagem 3D cinematográfico de um longa-metragem de animação familiar, com volume, profundidade, materiais macios, tecidos detalhados, sombras suaves e renderização premium",
+  },
+  "2d": {
+    artDirection: "ilustração 2D sofisticada de livro infantil, com desenho orgânico, formas expressivas, pintura digital rica, textura delicada e acabamento editorial",
+  },
+  vector: {
+    artDirection: "personagem em ilustração vetorial moderna, com silhueta clara, formas geométricas limpas, contornos bem resolvidos, cores marcantes e gradientes muito sutis",
+  },
+};
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -53,19 +61,20 @@ async function generateVariant(
   apiKey: string,
   imageData: string,
   mimeType: string,
-  variantInstruction: string,
+  artDirection: string,
 ) {
-  const prompt = `Você é um ilustrador de livros infantis. Revele o personagem que já existe neste desenho feito por uma criança.
+  const prompt = `Você é um diretor de arte especializado em personagens para crianças. Transforme o desenho infantil de referência em ${artDirection}.
 
 REGRAS OBRIGATÓRIAS:
-- preserve exatamente a ideia original, silhueta, proporções, quantidade e posição de braços, pernas, olhos, asas, chifres e acessórios;
-- preserve as cores e os detalhes incomuns, tortos ou assimétricos: eles são parte da identidade criada pela criança;
-- não corrija, não redesenhe e não acrescente poderes, roupas ou objetos que não estejam presentes;
-- apenas transforme o traço em uma ilustração finalizada, calorosa e apropriada para crianças;
-- mostre somente o personagem inteiro, centralizado, em fundo claro e simples;
-- não inclua texto, letras, moldura, assinatura ou marca.
+- preserve os elementos que tornam o personagem reconhecível: formato geral, penteado, rosto, roupa, capa, acessórios, símbolos existentes e paleta de cores;
+- interprete o traço no estilo escolhido, acrescentando acabamento profissional sem apagar a personalidade original;
+- dê ao rosto uma expressão calorosa e comunicativa, sem descaracterizar os elementos desenhados;
+- não copie nenhum personagem conhecido e não acrescente roupas, poderes, armas ou acessórios inexistentes;
+- se já existir uma letra ou símbolo importante na roupa, preserve-o; não crie textos novos;
+- mostre somente o personagem inteiro, centralizado, em pose natural, sobre fundo claro e simples;
+- o resultado deve parecer a evolução surpreendente do desenho, não apenas uma versão limpa ou redesenhada em 2D.
 
-Direção desta versão: ${variantInstruction}`;
+Direção desta versão: preserve a identidade original, use uma pose natural e crie uma expressão calorosa e encantadora.`;
 
   const response = await fetch(GOOGLE_INTERACTIONS_URL, {
     method: "POST",
@@ -83,7 +92,7 @@ Direção desta versão: ${variantInstruction}`;
         type: "image",
         mime_type: "image/jpeg",
         aspect_ratio: "1:1",
-        image_size: "1K",
+        image_size: "0.5K",
       },
     }),
   });
@@ -107,26 +116,17 @@ Deno.serve(async (request) => {
   if (!apiKey) return json({ error: "A chave da IA ainda não foi configurada." }, 500);
 
   try {
-    const { imageDataUrl } = await request.json();
+    const { imageDataUrl, style = "3d" } = await request.json();
     if (typeof imageDataUrl !== "string") return json({ error: "Envie um desenho válido." }, 400);
 
     const match = imageDataUrl.match(/^data:(image\/(?:jpeg|png));base64,(.+)$/s);
     if (!match) return json({ error: "O desenho precisa estar em JPG ou PNG." }, 400);
 
     const [, mimeType, imageData] = match;
-    const results = await Promise.allSettled(
-      variants.map((variant) => generateVariant(apiKey, imageData, mimeType, variant)),
-    );
-    const images = results
-      .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
-      .map((result) => result.value);
-
-    if (!images.length) {
-      const firstError = results.find((result) => result.status === "rejected");
-      throw firstError && firstError.status === "rejected"
-        ? firstError.reason
-        : new Error("Não foi possível gerar o personagem.");
-    }
+    const selectedStyle: CharacterStyle = style === "2d" || style === "vector" ? style : "3d";
+    const profile = styleProfiles[selectedStyle];
+    const image = await generateVariant(apiKey, imageData, mimeType, profile.artDirection);
+    const images = [image];
 
     return json({ images });
   } catch (error) {
@@ -137,4 +137,3 @@ Deno.serve(async (request) => {
     );
   }
 });
-

@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Header from "@/components/Header";
 import bookImg from "@/assets/demo-3-book.jpg";
-import { generateCharacterInterpretations } from "@/lib/ai";
+import { CharacterStyle, generateCharacterInterpretations } from "@/lib/ai";
 
 const TOTAL_STEPS = 5;
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -30,10 +30,15 @@ const loadingMessages = [
   "Imaginando quem vive nesse desenho...",
 ];
 
-const interpretations = [
-  { id: "fiel", label: "Bem parecido com o traço", hint: "Mantém as formas originais", style: "" },
-  { id: "colorido", label: "Um pouco mais colorido", hint: "Mesmas cores, mais vivas", style: "saturate-150" },
-  { id: "suave", label: "Mais suave", hint: "Traço macio e delicado", style: "saturate-75 brightness-105" },
+const characterStyles: Array<{
+  value: CharacterStyle;
+  emoji: string;
+  label: string;
+  description: string;
+}> = [
+  { value: "3d", emoji: "✨", label: "3D cinematográfico", description: "Volume, luz e magia de animação" },
+  { value: "2d", emoji: "🖍️", label: "Ilustração 2D", description: "Acabamento de livro infantil" },
+  { value: "vector", emoji: "◆", label: "Vetor moderno", description: "Formas limpas e cores marcantes" },
 ];
 
 const adventures = [
@@ -54,6 +59,7 @@ const Create = () => {
   const [messageIndex, setMessageIndex] = useState(0);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [generatedCharacters, setGeneratedCharacters] = useState<string[]>([]);
+  const [characterStyle, setCharacterStyle] = useState<CharacterStyle>("3d");
   const [characterData, setCharacterData] = useState({
     name: "",
     personality: "",
@@ -84,8 +90,9 @@ const Create = () => {
     setIsThinking(true);
 
     try {
-      const images = await generateCharacterInterpretations(uploadedImage);
+      const images = await generateCharacterInterpretations(uploadedImage, characterStyle);
       setGeneratedCharacters(images);
+      setSelectedCharacter("0");
       setStep(2);
     } catch (error) {
       setGenerationError(
@@ -255,6 +262,31 @@ const Create = () => {
                   Uso acompanhado por um adulto. O desenho só será utilizado após o consentimento do responsável.
                 </p>
 
+                <fieldset className="space-y-3">
+                  <legend className="font-display text-lg font-extrabold text-foreground">
+                    Como ele deve ganhar vida?
+                  </legend>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {characterStyles.map((style) => (
+                      <button
+                        key={style.value}
+                        type="button"
+                        aria-pressed={characterStyle === style.value}
+                        onClick={() => setCharacterStyle(style.value)}
+                        className={`rounded-2xl border-2 p-4 text-left transition-all ${
+                          characterStyle === style.value
+                            ? "border-primary bg-primary/10 shadow-md"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <span className="block text-2xl mb-2" aria-hidden="true">{style.emoji}</span>
+                        <span className="block font-bold text-sm text-foreground">{style.label}</span>
+                        <span className="block text-xs text-muted-foreground mt-1">{style.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
                 <Button
                   onClick={generateCharacters}
                   disabled={!uploadedImage || !consent}
@@ -291,56 +323,43 @@ const Create = () => {
             </Card>
           )}
 
-          {/* Passo 2 — Escolha o personagem */}
+          {/* Passo 2 — Conheça o personagem */}
           {step === 2 && !isThinking && (
             <Card className="border-2 border-accent/20 shadow-xl rounded-3xl">
               <CardHeader className="text-center">
                 <CardTitle className="font-display text-2xl md:text-3xl font-extrabold">
-                  Escolha o personagem
+                  Seu desenho ganhou vida!
                 </CardTitle>
                 <p className="text-muted-foreground">
-                  Veja três interpretações e escolha a que mais respeita o desenho.
+                  Confira o resultado. Se quiser, você pode criar outra versão.
                 </p>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {generatedCharacters.map((image, index) => {
-                    const option = interpretations[index] ?? interpretations[0];
-                    return (
-                    <button
-                      key={`${option.id}-${index}`}
-                      type="button"
-                      onClick={() => setSelectedCharacter(String(index))}
-                      className={`relative text-left rounded-2xl border-2 p-2 transition-all ${
-                        selectedCharacter === String(index)
-                          ? "border-primary bg-primary/5 shadow-lg"
-                          : "border-border hover:border-primary/50"
-                      }`}
+                <div className="mx-auto max-w-sm">
+                  {generatedCharacters.slice(0, 1).map((image, index) => (
+                    <div
+                      key={`personagem-${index}`}
+                      className="relative rounded-3xl border-2 border-primary bg-primary/5 p-3 shadow-lg"
                     >
                       <img
                         src={image}
-                        alt={`Interpretação do personagem: ${option.label}`}
-                        width={912}
-                        height={912}
+                        alt="Personagem criado a partir do desenho"
+                        width={512}
+                        height={512}
                         loading="lazy"
-                        className={`w-full aspect-square object-cover rounded-xl ${option.style}`}
+                        className="w-full aspect-square object-cover rounded-2xl"
                       />
-                      {selectedCharacter === String(index) && (
-                        <span className="absolute top-3 right-3 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                          <Check size={16} />
-                        </span>
-                      )}
-                      <span className="block font-bold text-sm text-foreground mt-2">{option.label}</span>
-                      <span className="block text-xs text-muted-foreground pb-1">{option.hint}</span>
-                    </button>
-                    );
-                  })}
+                      <span className="absolute top-5 right-5 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md">
+                        <Check size={18} />
+                      </span>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button variant="outline" size="lg" className="gap-2" onClick={generateCharacters}>
                     <RefreshCw size={18} />
-                    Tentar novamente
+                    Criar outra versão
                   </Button>
                   <Button
                     size="lg"
