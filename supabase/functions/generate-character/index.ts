@@ -10,7 +10,7 @@ type CharacterStyle = "3d" | "2d" | "vector";
 
 const styleProfiles: Record<CharacterStyle, { artDirection: string }> = {
   "3d": {
-    artDirection: "personagem 3D cinematográfico de um longa-metragem de animação familiar, com volume, profundidade, materiais macios, tecidos detalhados, sombras suaves e renderização premium",
+    artDirection: `um personagem CGI 3D cinematográfico, reconstruído como um modelo tridimensional completo e não como uma pintura. Use cabeça, corpo, braços, roupa e acessórios com volume real; formas arredondadas; pele e materiais macios; tecido com espessura e costuras sutis; olhos com reflexos; iluminação de estúdio com luz principal, luz de recorte e sombras de contato; profundidade de campo suave; renderização premium de longa-metragem de animação familiar. O resultado deve parecer um boneco 3D fotografado em um estúdio, com profundidade e presença física. PROIBIDO: aquarela, papel, textura de papel, lápis, giz, pinceladas, line art, contornos desenhados, ilustração plana ou aparência 2D`,
   },
   "2d": {
     artDirection: "ilustração 2D sofisticada de livro infantil, com desenho orgânico, formas expressivas, pintura digital rica, textura delicada e acabamento editorial",
@@ -63,11 +63,12 @@ async function generateVariant(
   mimeType: string,
   artDirection: string,
 ) {
-  const prompt = `Você é um diretor de arte especializado em personagens para crianças. Transforme o desenho infantil de referência em ${artDirection}.
+  const prompt = `Você é um diretor de arte especializado em personagens para crianças. Use o desenho somente como referência de IDENTIDADE e transforme o personagem em ${artDirection}.
 
 REGRAS OBRIGATÓRIAS:
 - preserve os elementos que tornam o personagem reconhecível: formato geral, penteado, rosto, roupa, capa, acessórios, símbolos existentes e paleta de cores;
-- interprete o traço no estilo escolhido, acrescentando acabamento profissional sem apagar a personalidade original;
+- preserve a identidade e o design, mas NÃO preserve o material artístico, a textura, os contornos nem a técnica do desenho original;
+- reconstrua todas as formas e superfícies integralmente na direção artística escolhida;
 - dê ao rosto uma expressão calorosa e comunicativa, sem descaracterizar os elementos desenhados;
 - não copie nenhum personagem conhecido e não acrescente roupas, poderes, armas ou acessórios inexistentes;
 - se já existir uma letra ou símbolo importante na roupa, preserve-o; não crie textos novos;
@@ -92,7 +93,7 @@ Direção desta versão: preserve a identidade original, use uma pose natural e 
         type: "image",
         mime_type: "image/jpeg",
         aspect_ratio: "1:1",
-        image_size: "0.5K",
+        image_size: "512",
       },
     }),
   });

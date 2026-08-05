@@ -17,8 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Header from "@/components/Header";
-import bookImg from "@/assets/demo-3-book.jpg";
 import { CharacterStyle, generateCharacterInterpretations } from "@/lib/ai";
+import { generateStorybook, Storybook } from "@/lib/story";
 
 const TOTAL_STEPS = 5;
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -68,6 +68,9 @@ const Create = () => {
     details: "",
   });
   const [selectedAdventure, setSelectedAdventure] = useState("");
+  const [story, setStory] = useState<Storybook | null>(null);
+  const [isWritingStory, setIsWritingStory] = useState(false);
+  const [storyError, setStoryError] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -136,6 +139,24 @@ const Create = () => {
   };
 
   const goBack = () => setStep((s) => Math.max(1, s - 1));
+
+  const createStory = async () => {
+    if (!selectedAdventure) return;
+    setStoryError("");
+    setIsWritingStory(true);
+
+    try {
+      const adventure = adventures.find((item) => item.value === selectedAdventure)?.label
+        ?? selectedAdventure;
+      const result = await generateStorybook({ character: characterData, adventure });
+      setStory(result);
+      setStep(5);
+    } catch (error) {
+      setStoryError(error instanceof Error ? error.message : "Não foi possível escrever a história.");
+    } finally {
+      setIsWritingStory(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-background">
@@ -495,47 +516,62 @@ const Create = () => {
                     size="lg"
                     variant="playful"
                     className="flex-1"
-                    disabled={!selectedAdventure}
-                    onClick={() => setStep(5)}
+                    disabled={!selectedAdventure || isWritingStory}
+                    onClick={createStory}
                   >
-                    Criar o livro
+                    {isWritingStory ? "Escrevendo a aventura..." : "Criar a história"}
                   </Button>
                 </div>
+                {storyError && (
+                  <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-bold text-destructive">
+                    {storyError}
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
 
-          {/* Passo 5 — Prévia do livro */}
-          {step === 5 && (
+          {/* Passo 5 — História */}
+          {step === 5 && story && (
             <Card className="border-2 border-accent/20 shadow-xl rounded-3xl">
               <CardHeader className="text-center">
                 <CardTitle className="font-display text-2xl md:text-3xl font-extrabold">
-                  A prévia do livro está pronta
+                  {story.title}
                 </CardTitle>
                 <p className="text-muted-foreground">
-                  {characterData.name || "O personagem"} é o protagonista desta história.
+                  {story.summary}
                 </p>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="rounded-2xl border-2 border-secondary/40 bg-muted/40 p-4">
-                  <img
-                    src={bookImg}
-                    alt="Prévia da capa do livro ilustrado"
-                    width={912}
-                    height={912}
-                    loading="lazy"
-                    className="w-full max-w-sm mx-auto rounded-xl shadow-lg"
-                  />
+                <div className="rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-accent/10 p-6 text-center">
+                  {selectedCharacter !== null && generatedCharacters[Number(selectedCharacter)] && (
+                    <img
+                      src={generatedCharacters[Number(selectedCharacter)]}
+                      alt={`Personagem ${characterData.name}`}
+                      className="mx-auto mb-4 aspect-square w-44 rounded-2xl object-cover shadow-lg"
+                    />
+                  )}
+                  <p className="text-sm font-bold uppercase tracking-wide text-primary">Mensagem da aventura</p>
+                  <p className="mt-2 font-display text-lg font-bold text-foreground">{story.message}</p>
+                </div>
+
+                <div className="space-y-4">
+                  {story.pages.map((page) => (
+                    <article key={page.page} className="rounded-2xl border-2 border-border bg-background p-5 shadow-sm">
+                      <p className="mb-2 text-sm font-extrabold text-primary">Página {page.page}</p>
+                      <p className="leading-relaxed text-foreground">{page.text}</p>
+                    </article>
+                  ))}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button variant="outline" size="lg" className="gap-2" onClick={() => setStep(4)}>
                     <RefreshCw size={18} />
-                    Tentar novamente
+                    Criar outra história
                   </Button>
-                  <Button size="lg" variant="playful" className="flex-1 gap-2">
+                  <Button size="lg" variant="playful" className="flex-1 gap-2" disabled>
                     <BookOpen size={18} />
-                    Ler o livro
+                    Ilustrações em breve
                   </Button>
                 </div>
 
