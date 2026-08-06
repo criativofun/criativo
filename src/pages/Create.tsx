@@ -142,13 +142,20 @@ const Create = () => {
 
   const createStory = async () => {
     if (!selectedAdventure) return;
+    const characterImage = selectedCharacter !== null
+      ? generatedCharacters[Number(selectedCharacter)]
+      : null;
+    if (!characterImage) {
+      setStoryError("Escolha o personagem que vai viver esta aventura.");
+      return;
+    }
     setStoryError("");
     setIsWritingStory(true);
 
     try {
       const adventure = adventures.find((item) => item.value === selectedAdventure)?.label
         ?? selectedAdventure;
-      const result = await generateStorybook({ character: characterData, adventure });
+      const result = await generateStorybook({ character: characterData, adventure, characterImage });
       setStory(result);
       setStep(5);
     } catch (error) {
@@ -553,6 +560,10 @@ const Create = () => {
                   )}
                   <p className="text-sm font-bold uppercase tracking-wide text-primary">Mensagem da aventura</p>
                   <p className="mt-2 font-display text-lg font-bold text-foreground">{story.message}</p>
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    <span className="font-bold text-foreground">Nosso personagem: </span>
+                    {story.characterDescription}
+                  </p>
                 </div>
 
                 <div className="space-y-4">

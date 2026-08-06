@@ -10,6 +10,7 @@ export type Storybook = {
   title: string;
   summary: string;
   message: string;
+  characterDescription: string;
   pages: StoryPage[];
 };
 
@@ -22,6 +23,7 @@ type StoryRequest = {
     details: string;
   };
   adventure: string;
+  characterImage: string;
 };
 
 export async function generateStorybook(input: StoryRequest): Promise<Storybook> {

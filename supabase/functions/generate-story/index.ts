@@ -17,6 +17,11 @@ function clean(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+function validCharacterImage(value: unknown) {
+  if (typeof value !== "string" || value.length > 8_000_000) return "";
+  return /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(value) ? value : "";
+}
+
 function extractOutputText(payload: Record<string, unknown>) {
   if (typeof payload.output_text === "string") return payload.output_text;
 
@@ -39,11 +44,12 @@ function extractOutputText(payload: Record<string, unknown>) {
 const storySchema = {
   type: "object",
   additionalProperties: false,
-  required: ["title", "summary", "message", "pages"],
+  required: ["title", "summary", "message", "characterDescription", "pages"],
   properties: {
     title: { type: "string" },
     summary: { type: "string" },
     message: { type: "string" },
+    characterDescription: { type: "string" },
     pages: {
       type: "array",
       minItems: 8,
@@ -78,8 +84,9 @@ Deno.serve(async (request) => {
     const dreams = clean(character.dreams, 300);
     const details = clean(character.details, 400);
     const adventure = clean(body?.adventure, 80);
+    const characterImage = validCharacterImage(body?.characterImage);
 
-    if (!name || !personality || !adventure) {
+    if (!name || !personality || !adventure || !characterImage) {
       return json({ error: "Faltam informações para criar a história." }, 400);
     }
 
@@ -96,13 +103,19 @@ PERSONAGEM
 - Tema da aventura: ${adventure}
 
 REQUISITOS
+- Primeiro, observe a imagem e crie em characterDescription uma descrição visual canônica e concisa do personagem: espécie ou tipo, aparência, cores, roupa, acessórios e traços marcantes. Não descreva fundo, pose ou iluminação.
+- Trate a imagem como fonte principal para a aparência. Use os dados escritos para personalidade, desejos e preferências; não contradiga o que está visível.
 - Produza exatamente 8 páginas, numeradas de 1 a 8.
 - Cada página deve ter entre 35 e 65 palavras, com linguagem clara, sonora e adequada à faixa etária.
-- Construa começo, descoberta, desafio seguro, tentativa, cooperação, resolução e final caloroso.
+- Conte uma única aventura com relação clara de causa e consequência. Não crie cenas soltas.
+- Antes de escrever, defina silenciosamente um objetivo central e um pequeno desafio. Tudo que surgir deve ajudar ou dificultar esse mesmo objetivo.
+- Use esta progressão: página 1 apresentação e desejo; 2 convite ou descoberta; 3 entrada na aventura; 4 primeiro obstáculo; 5 tentativa que não resolve tudo; 6 nova ideia ou cooperação; 7 resolução causada pelas escolhas do personagem; 8 retorno caloroso e fechamento.
+- Não introduza novos problemas depois da página 6 nem resolva o conflito por coincidência ou por um personagem que surge de repente.
 - O personagem deve agir de acordo com sua personalidade e aprender algo sem moralismo explícito.
 - Evite violência, medo intenso, humilhação, perigo realista, marcas, personagens conhecidos e estereótipos.
 - Não mencione inteligência artificial nem diga que a história foi gerada.
-- A descrição visual de cada página deve ser objetiva e manter roupa, cores e detalhes do personagem consistentes.
+- Em cada illustrationPrompt, repita os elementos essenciais de characterDescription e mantenha roupa, cores, proporções e acessórios consistentes com a imagem.
+- O texto da história pode mencionar traços visuais quando forem naturais para a ação, sem repetir uma ficha descritiva em todas as páginas.
 - Não invente texto visível dentro das ilustrações.`;
 
     const response = await fetch(OPENAI_RESPONSES_URL, {
@@ -113,7 +126,13 @@ REQUISITOS
       },
       body: JSON.stringify({
         model: "gpt-5.6-luna",
-        input: prompt,
+        input: [{
+          role: "user",
+          content: [
+            { type: "input_text", text: prompt },
+            { type: "input_image", image_url: characterImage, detail: "low" },
+          ],
+        }],
         reasoning: { effort: "none" },
         max_output_tokens: 3200,
         text: {
